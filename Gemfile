@@ -61,3 +61,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "jwt", "~> 2.10"
+
+gem "dotenv-rails", "~> 3.1"

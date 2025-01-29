@@ -1,0 +1,9 @@
+<h1 class="fun-donotes">FunDoNotes</h1>  
+<div class="notes-list">  
+  <% @notes.each do |note| %>  
+    <div class="note">  
+      <h2><%= note.title %></h2>  
+      <p><%= note.content %></p>  
+    </div>  
+  <% end %>  
+</div>

@@ -1,0 +1,74 @@
+<h1 class="fun-donotes">Login</h1>  
+
+<div id="flash-message"></div>  
+
+<form id="login-form">  
+  <div class="form-group">  
+    <label for="email">Email</label>  
+    <input type="email" id="email" name="email" required />  
+  </div>  
+
+  <div class="form-group">  
+    <label for="password">Password</label>  
+    <input type="password" id="password" name="password" required />  
+  </div>  
+
+  <button type="submit">Log In</button>  
+</form>  
+
+<script>  
+document.getElementById('login-form').addEventListener('submit', function(event) {  
+    event.preventDefault();  
+
+    const email = document.getElementById('email').value;  
+    const password = document.getElementById('password').value;  
+
+    fetch('/api/v1/login', {  
+        method: 'POST',  
+        headers: {  
+            'Content-Type': 'application/json',  
+        },  
+        body: JSON.stringify({ email: email, password: password }),  
+    })  
+    .then(response => response.json())  
+    .then(data => {  
+        if (data.message) {  
+            // Successful login  
+            document.getElementById('flash-message').textContent = data.message;  
+            window.location.href = '/'; // Redirect to the home page  
+        } else if (data.errors) {  
+            // Show error message  
+            document.getElementById('flash-message').textContent = data.errors;  
+            document.getElementById('flash-message').style.color = 'red';  
+        }  
+    })  
+    .catch((error) => {  
+        console.error('Error:', error);  
+    });  
+});  
+</script>  
+
+<style>  
+.form-group {  
+    margin-bottom: 15px;  
+}  
+
+input[type="email"],  
+input[type="password"] {  
+    width: 100%;  
+    padding: 10px;  
+    margin-top: 5px;  
+}  
+
+button {  
+    padding: 10px;  
+    background-color: red;  
+    color: white;  
+    border: none;  
+    cursor: pointer;  
+}  
+
+#flash-message {  
+    margin-bottom: 15px;  
+}  
+</style>
