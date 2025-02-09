@@ -19,7 +19,16 @@ module Api
         end
       end
 
-      
+      def getnote
+        token = request.headers["Authorization"]&.split(" ")&.last
+        result = NotesService.getnote(token)        
+        if result[:success]
+          render json: result[:note], status: :ok
+        else
+          render json: { errors: result[:error] }, status: :unprocessable_entity
+        end
+      end
+
       def note_params
         params.require(:note).permit(:title, :content, :color)
       end
