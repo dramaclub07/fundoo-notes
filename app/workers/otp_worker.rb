@@ -14,6 +14,7 @@ class OtpWorker
       send_otp_email(otp_data)
     end
   end
+  
 
   def self.send_otp_email(otp_data)
     user = User.find_by(email: otp_data["email"])
