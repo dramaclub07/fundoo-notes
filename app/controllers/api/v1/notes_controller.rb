@@ -39,6 +39,17 @@ module Api
           render json: { errors: result[:errors] }, status: :unprocessable_entity
         end
       end
+      
+       def update
+        note_id = params[:id]
+        token = request.headers["Authorization"]&.split(" ")&.last
+        result = NotesService.update_note(note_id, token, note_params)
+        if result[:success]
+          render json: result[:note], status: :ok
+        else
+          render json: { errors: result[:errors] }, status: :unprocessable_entity
+        end
+      end
 
       def note_params
         params.require(:note).permit(:title, :content, :color)
