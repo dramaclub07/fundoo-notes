@@ -60,7 +60,7 @@ module Api
           render json: { error: result[:error] }, status: :unprocessable_entity
         end
       end
-      
+
       def archive
         note_id = params[:id]
         result = NotesService.archive_toggle(note_id)
@@ -69,6 +69,28 @@ module Api
         else
           render json: { errors: result[:errors] }, status: :unprocessable_entity
         end
+      end
+      
+      def update_color
+        note_id = params[:id]
+        color = params[:color]
+        result = NotesService.update_color(note_id, color)
+        if result[:success]
+          render json: { message: result[:message] }, status: :ok
+        else
+          render json: { errors: result[:errors] }, status: :unprocessable_entity
+        end
+      end
+
+      private
+
+      def find_note
+        unless current_user
+          return render json: { error: 'Unauthorized' }, status: :unauthorized
+        end
+
+        @note = current_user.notes.find_by(id: params[:id])
+        return render json: { error: 'Note not found' }, status: :not_found unless @note
       end
       
 
