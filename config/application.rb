@@ -2,6 +2,9 @@ require_relative "boot"
 
 require "rails/all"
 
+require 'redis'
+
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
@@ -15,6 +18,12 @@ module FundooNotes
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+
+    # ✅ Corrected Redis Cache Configuration
+    config.cache_store = :redis_store, "redis://localhost:6389/0/cache", { expires_in: 90.minutes }
+
+    # ✅ Corrected Session Store
+    config.session_store :cache_store, key: "_your_app_session", expire_after: 1.day
 
     # Configuration for the application, engines, and railties goes here.
     #

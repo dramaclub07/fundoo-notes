@@ -63,5 +63,10 @@ group :test do
 end
 
 gem "jwt", "~> 2.10"
+gem 'bunny'
 
 gem "dotenv-rails", "~> 3.1"
+
+gem "devise", "~> 4.9"
+gem "redis", "~> 4.3"
+# gem "redis-rails"

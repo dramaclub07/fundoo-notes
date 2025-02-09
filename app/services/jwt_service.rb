@@ -10,9 +10,16 @@ class JwtService
 
   # Decode a JWT Token
   def self.decode(token)
-    decoded_token = JWT.decode(token, SECRET_KEY, true, algorithm: 'HS256')[0]
-    decoded_token.symbolize_keys 
-  rescue JWT::DecodeError
+    decoded = JWT.decode(token, SECRET_KEY, true, algorithms: 'HS256')[0]
+    payload = HashWithIndifferentAccess.new(decoded)
+    return User.find_by(id: payload[:user_id])
+  rescue
     nil
   end
+  # def self.decode(token)
+  #   decoded_token = JWT.decode(token, SECRET_KEY, true, algorithm: 'HS256')[0]
+  #   decoded_token.symbolize_keys 
+  # rescue JWT::DecodeError
+  #   nil
+  # end
 end
