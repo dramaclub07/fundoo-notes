@@ -50,7 +50,7 @@ module Api
           render json: { errors: result[:errors] }, status: :unprocessable_entity
         end
       end
-      
+
       def trash
         note_id = params[:id]
         result = NotesService.trash_toggle(note_id)
@@ -58,6 +58,16 @@ module Api
           render json: { message: result[:message]}, status: :ok
         else
           render json: { error: result[:error] }, status: :unprocessable_entity
+        end
+      end
+      
+      def archive
+        note_id = params[:id]
+        result = NotesService.archive_toggle(note_id)
+        if result[:success]
+          render json: { message: result[:message] }, status: :ok
+        else
+          render json: { errors: result[:errors] }, status: :unprocessable_entity
         end
       end
       
