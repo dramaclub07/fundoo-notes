@@ -1,11 +1,10 @@
-# app/controllers/api/v1/notes_controller.rb
 module Api
   module V1
     class NotesController < ApplicationController
       skip_before_action :verify_authenticity_token
 
       def index
-        notes = current_user.notes.active 
+        notes = current_user.notes.active
         render json: { notes: notes }, status: :ok
       end
 
@@ -15,39 +14,44 @@ module Api
         if result[:success]
           render json: result[:note], status: :created
         else
-          render json: { errors: result[:errors] }, status: :unprocessable_entity
+          render json: { error: result[:errors] }, status: :unprocessable_entity
         end
       end
 
       def getnote
         token = request.headers["Authorization"]&.split(" ")&.last
-        result = NotesService.getnote(token)        
+        result = NotesService.getnote(token)
         if result[:success]
-          render json: result[:note], status: :ok
+          render json: { notes: result[:body] }, status: :ok
         else
-          render json: { errors: result[:error] }, status: :unprocessable_entity
+          render json: { error: result[:error] }, status: :unprocessable_entity
         end
       end
-      
+
       def getnotebyid
         token = request.headers["Authorization"]&.split(" ")&.last
+        if token.nil?
+          render json: { error: 'Missing authorization token' }, status: :unauthorized
+          return
+        end
+        
         note_id = params[:id]
         result = NotesService.get_note_by_id(note_id, token)
         if result[:success]
           render json: result[:note], status: :ok
         else
-          render json: { errors: result[:errors] }, status: :unprocessable_entity
+          render json: { error: result[:error] }, status: :unprocessable_entity
         end
       end
 
-       def update
+      def update
         note_id = params[:id]
         token = request.headers["Authorization"]&.split(" ")&.last
         result = NotesService.update_note(note_id, token, note_params)
         if result[:success]
           render json: result[:note], status: :ok
         else
-          render json: { errors: result[:errors] }, status: :unprocessable_entity
+          render json: { error: result[:errors] }, status: :unprocessable_entity
         end
       end
 
@@ -55,7 +59,7 @@ module Api
         note_id = params[:id]
         result = NotesService.trash_toggle(note_id)
         if result[:success]
-          render json: { message: result[:message]}, status: :ok
+          render json: { message: result[:message] }, status: :ok
         else
           render json: { error: result[:error] }, status: :unprocessable_entity
         end
@@ -67,10 +71,10 @@ module Api
         if result[:success]
           render json: { message: result[:message] }, status: :ok
         else
-          render json: { errors: result[:errors] }, status: :unprocessable_entity
+          render json: { error: result[:errors] }, status: :unprocessable_entity
         end
       end
-      
+
       def update_color
         note_id = params[:id]
         color = params[:color]
@@ -78,21 +82,11 @@ module Api
         if result[:success]
           render json: { message: result[:message] }, status: :ok
         else
-          render json: { errors: result[:errors] }, status: :unprocessable_entity
+          render json: { error: result[:errors] }, status: :unprocessable_entity
         end
       end
 
       private
-
-      def find_note
-        unless current_user
-          return render json: { error: 'Unauthorized' }, status: :unauthorized
-        end
-
-        @note = current_user.notes.find_by(id: params[:id])
-        return render json: { error: 'Note not found' }, status: :not_found unless @note
-      end
-      
 
       def note_params
         params.require(:note).permit(:title, :content, :color)

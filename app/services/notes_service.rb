@@ -35,13 +35,28 @@ class NotesService
 
   def self.get_note_by_id(note_id, token)
     user_id = JwtService.decode(token)
+    Rails.logger.info("Decoded user_id: #{user_id}")
+    return { success: false, error: "Invalid token" } if user_id.nil?
+
     note = Note.find_by(id: note_id)
-    if note && note.user_id == user_id[:id]
-      { success: true, note: note }
-    else
-      { success: false, error: "Token not valid for this model" }
+     
+    Rails.logger.info("Fetched Note: #{note.inspect}") # Debugging log
+     
+    # Rails.logger.info("Decoded user_id: #{user_id}") 
+    if note.nil?
+      return { success: false, error: "Note not found" }
     end
-  end
+    return { success: false, error: "Unauthorized access" } unless note.user_id == user_id
+
+    { success: true, note: note }
+end
+  #   if note && note.user_id == user_id[:id]
+  #     { success: true, note: note }
+  #   else
+  #     Rails.logger.error("Note not found or unauthorized for user_id: #{user_id}")
+  #     { success: false, error: "Token not valid for this model" }
+  #   end
+  # end
 
   def self.archive_toggle(note_id)
     note = Note.find_by(id: note_id)
@@ -74,6 +89,7 @@ class NotesService
       { success: false, errors: "Note not found" }
     end
   end
+end
 
   # def self.add_collaborator(note, email)
   #   collaborator = User.find_by(email: email)
@@ -110,5 +126,3 @@ class NotesService
   #   }
   # end
 
-
-end

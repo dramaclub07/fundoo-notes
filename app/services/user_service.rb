@@ -37,7 +37,7 @@ class UserService
 
     # Publish the OTP message to RabbitMQ
     send_otp_to_queue(user.email, otp, otp_expiry)
-    OtpWorker.start         #OTP WORKER START HERE
+    Thread.new{OtpWorker.start}         #OTP WORKER START HERE
     { success: true, message: "OTP is being processed and will be sent shortly." }
   end
 

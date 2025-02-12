@@ -10,16 +10,20 @@ class JwtService
 
   # Decode a JWT Token
   def self.decode(token)
-    decoded = JWT.decode(token, SECRET_KEY, true, algorithms: 'HS256')[0]
-    payload = HashWithIndifferentAccess.new(decoded)
-    return User.find_by(id: payload[:user_id])
-  rescue
-    nil
+    begin
+      decoded = JWT.decode(token, SECRET_KEY, true, algorithms: 'HS256')[0]
+      payload = HashWithIndifferentAccess.new(decoded)
+
+      Rails.logger.info "Decoded JWT payload: #{payload.to_json}"
+
+      user =  User.find_by(id: payload[:user_id])
+      return payload[:user_id] if user 
+    rescue JWT::DecodeError => e
+      Rails.logger.error("JWT Decode Error: #{e.message}")
+      nil
+    rescue StandardError => e
+      Rails.logger.error("Unexpected Error: #{e.message}")
+      nil
+    end
   end
-  # def self.decode(token)
-  #   decoded_token = JWT.decode(token, SECRET_KEY, true, algorithm: 'HS256')[0]
-  #   decoded_token.symbolize_keys 
-  # rescue JWT::DecodeError
-  #   nil
-  # end
 end

@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
-  devise_for :users
+  mount Rswag::Ui::Engine => '/api-docs'
+  mount Rswag::Api::Engine => '/api-docs'
+  #devise_for :users
   namespace :api do
     namespace :v1 do
       #user's routes
@@ -14,6 +16,7 @@ Rails.application.routes.draw do
       
       post 'notes/create' => 'notes#create'    #create new note ok
       get 'notes/getnote' => 'notes#getnote'           #getnotes ok
+      get 'notes/getnotebyid/:id' => 'notes#getnotebyid'  
       put 'notes/archive/:id'=>'notes#archive'      #archive toggle  ok
       put 'notes/trash/:id'=> 'notes#trash'        #trash toggle ok
       put 'notes/update_color/:id/:color' => 'notes#update_color' #update color
