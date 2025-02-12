@@ -36,18 +36,15 @@ class NotesService
   def self.get_note_by_id(note_id, token)
     user_id = JwtService.decode(token)
     Rails.logger.info("Decoded user_id: #{user_id}")
+
     return { success: false, error: "Invalid token" } if user_id.nil?
 
-    note = Note.find_by(id: note_id)
-     
-    Rails.logger.info("Fetched Note: #{note.inspect}") # Debugging log
-     
-    # Rails.logger.info("Decoded user_id: #{user_id}") 
-    if note.nil?
-      return { success: false, error: "Note not found" }
-    end
-    return { success: false, error: "Unauthorized access" } unless note.user_id == user_id
+    return { success: false, error: "Invalid Note ID" } if note_id.blank?
 
+    note = Note.find_by(id: note_id)
+    Rails.logger.info("Fetched Note: #{note.inspect}") # Debugging log
+   
+    return { success: false, error: "Unauthorized access" } unless note.user_id.to_i == user_id.to_i 
     { success: true, note: note }
 end
   #   if note && note.user_id == user_id[:id]
