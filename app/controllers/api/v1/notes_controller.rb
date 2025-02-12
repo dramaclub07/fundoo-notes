@@ -37,12 +37,20 @@ module Api
         
         note_id = params[:id]
         result = NotesService.get_note_by_id(note_id, token)
+
         if result[:success]
           render json: result[:note], status: :ok
         else
-          render json: { error: result[:error] }, status: :unprocessable_entity
+          case result[:error]
+          when "invalid token", "Unauthorized access"
+            render json: { error: result[:error] }, status: :unauthorized
+          when "note not found"
+            render json: { error: result[:error] }, status: :not_found
+          else
+            render json: { error: result[:error] }, status: :unprocessable_entity
         end
       end
+    end
 
       def update
         note_id = params[:id]
