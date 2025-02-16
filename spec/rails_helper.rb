@@ -9,6 +9,17 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 
 require 'rspec/rails'
 
+module RequestSpecHelper
+  def json
+    JSON.parse(response.body)
+  end
+end
+
+RSpec.configure do |config|
+  config.include RequestSpecHelper, type: :request
+end
+
+
 # Requires supporting ruby files with custom matchers and macros, etc.,
 # in spec/support/ and its subdirectories.
 # Automatically requires all files in the support directory.
