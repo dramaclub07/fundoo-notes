@@ -71,7 +71,7 @@ class Api::V1::UsersController < ApplicationController
   private
 
   def user_params
-    params.fetch(:user, {}).permit(:name, :email, :password, :phone_number)
+    params.fetch(:user, {}).permit(:name, :email, :phone_number, :password, :password_confirmation)
   end
 
   def fp_params

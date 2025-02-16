@@ -3,17 +3,33 @@ class UserService
   class AuthenticationError < StandardError; end
   class UserNotFoundError < StandardError; end
 
-
-  def self.register(user_params)
-    user = User.new(user_params)
+  def self.register(params)
+    user = User.new(params)
     if user.save
-      # UserMailer.welcome_email(user).deliver_now
       { success: true, user: user }
     else
       { success: false, errors: user.errors.full_messages }
     end
+  rescue ActiveRecord::RecordNotUnique => e
+    { success: false, errors: ["Email or phone number has already been taken"] }
   end
-
+  # def self.register(user_params)
+  #   user = User.new(user_params)
+  #   if user.save
+  #     # UserMailer.welcome_email(user).deliver_now
+  #     { success: true, user: user }
+  #   else
+  #     { success: false, errors: user.errors.full_messages }
+  #   end
+  # end
+  # rescue ActiveRecord::RecordNotUnique => e
+  #   if e.message.include?('email')
+  #     { success: false, errors: ['Email has already been taken'] }
+  #   elsif e.message.include?('phone_number')
+  #     { success: false, errors: ['Phone number has already been taken'] }
+  #   else
+  #     { success: false, errors: ['An unknown error occurred'] }
+  #   end
   # def self.forgetpassword(params)
   #   user = User.find_by(email: params[:email])
   #   return { success: false, errors: "User Not Found" } unless user
