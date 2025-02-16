@@ -21,7 +21,7 @@ class UserService
   #   otp = user.generate_otp
   #   begin
   #     UserMailer.send_otp_email(user, otp).deliver_now
-  #     { success: true, message: "OTP sent to your email successfully" }
+  #     { success: true, message : "OTP sent to your email successfully" }
   #   rescue StandardError => e
   #     Rails.logger.error("OTP email failed: #{e.message}")
   #     { success: false, errors: "Failed to send OTP. Please try again later." }

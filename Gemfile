@@ -49,8 +49,8 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-
-  gem "rspec-rails"
+  gem "database_cleaner"
+  gem "faker"
 
 
 end
@@ -64,6 +64,9 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem "rspec-rails"
+  gem "shoulda-matchers"
+  gem "factory_bot_rails"
 end
 
 gem "jwt", "~> 2.10"
