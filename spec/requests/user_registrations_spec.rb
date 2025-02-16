@@ -1,41 +1,48 @@
 require 'rails_helper'
 
-RSpec.describe 'User Registration', type: :request do
-  def json_response
-    JSON.parse(response.body)
-  end
+RSpec.describe 'User Login API', type: :request do
+  let!(:user) { create(:user, email: 'test@example.com', password: 'P@ssw0rd', phone_number: '9876543210') }
 
-  it 'registers a new user with valid parameters' do
-    valid_params = {
-      user: {
-        name: 'John Doe',
-        email: 'john@example.com',
-        phone_number: '9873569890',
-        password: 'P@ssw0rd',
-        password_confirmation: 'P@ssw0rd'
-      }
-    }
+  describe 'POST /api/v1/users/login' do
+    context 'when valid credentials are provided' do
+      before do
+        post '/api/v1/users/login', params: { user: { email: 'test@example.com', password: 'P@ssw0rd' } }
+      end
 
-    post '/api/v1/register', params: valid_params
+      it 'returns a success message' do
+        expect(response.status).to eq(200)
+        expect(json['message']).to eq('Login successful')
+      end
 
-    expect(response).to have_http_status(:created)
-    expect(json_response['message']).to eq('User registered successfully')
-  end
+      it 'returns the user data' do
+        expect(json['user']['email']).to eq('test@example.com')
+      end
 
-  it 'returns validation errors for invalid parameters' do
-    invalid_params = {
-      user: {
-        name: '',
-        email: 'john@example.com',
-        phone_number: '12345',
-        password: 'P@ssw0rd',
-        password_confirmation: 'mismatch'
-      }
-    }
+      it 'returns an authentication token' do
+        expect(json['token']).not_to be_nil
+      end
+    end
 
-    post '/api/v1/register', params: invalid_params
+    context 'when invalid credentials are provided' do
+      before do
+        post '/api/v1/users/login', params: { user: { email: 'test@example.com', password: 'wrongpassword' } }
+      end
 
-    expect(response).to have_http_status(:unprocessable_entity)
-    expect(json_response['errors']).to include("Name can't be blank", "Phone number must be 10 digits")
+      it 'returns an error message' do
+        expect(response.status).to eq(401)
+        expect(json['errors']).to eq('Invalid email or password')
+      end
+    end
+
+    context 'when the email does not exist' do
+      before do
+        post '/api/v1/users/login', params: { user: { email: 'nonexistent@example.com', password: 'P@ssw0rd' } }
+      end
+
+      it 'returns an error message' do
+        expect(response.status).to eq(401)
+        expect(json['errors']).to eq('Invalid email or password')
+      end
+    end
   end
 end
