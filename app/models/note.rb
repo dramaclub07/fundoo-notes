@@ -6,6 +6,7 @@ class Note < ApplicationRecord
 
   validates :title, presence: true
   validates :content, presence: true
+  validates :color, presence: true
 
   scope :active, -> { where(is_deleted: false, is_archived: false) }
   scope :archived, -> { where(is_archived: true) }
