@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       get 'profile', to: 'users#profile'
       post 'forgetpassword', to: 'users#forgetpassword'
       post 'resetpassword/:id', to: 'users#resetpassword'
+      post 'verify_otp', to: 'users#verify_otp'
 
       #notes routes.
       
@@ -20,7 +21,7 @@ Rails.application.routes.draw do
       put 'notes/archive/:id'=>'notes#archive'      #archive toggle  ok
       put 'notes/trash/:id'=> 'notes#trash'        #trash toggle ok
       put 'notes/update_color/:id/:color' => 'notes#update_color' #update color
-      #put 'notes/update/:id' => 'notes#update'      #update notes
+      put 'notes/update/:id' => 'notes#update'      #update notes
       
     end  
   end
