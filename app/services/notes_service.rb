@@ -20,7 +20,7 @@ class NotesService
     end
   end
 
-  def self.update_note(note_id, token, note_params)
+  def self.update_color(note_id, token, note_params)
     decoded_data = JwtService.decode(token)
     return { success: false, error: "Invalid token data" } unless decoded_data.is_a?(Hash) && decoded_data["user_id"].present?
 
