@@ -12,10 +12,13 @@ config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
   address: "smtp.gmail.com",
   port: 587,
   domain: "gmail.com",
-  authentication: "plain",
   enable_starttls_auto: true,
   user_name: ENV["EMAIL_USERNAME"], # Load from .env
-  password: ENV["EMAIL_PASSWORD"] # Load from .env
+  password: ENV["EMAIL_PASSWORD"],# Load from .env
+  authentication: "plain",
+  enable_starttls_auto: true,
+  open_timeout: 120,  # Increase timeout for connection
+  read_timeout: 120   # Increase timeout for reading response
 }
   # Settings specified here will take precedence over those in config/application.rb.
 
