@@ -23,9 +23,10 @@ attr_accessor :otp_expiry
   def generate_otp
     otp = rand(100000..999999).to_s
     expiry = 10.minutes.from_now
-    self.class.store_otp(email, otp, expiry)  # Pass expiry
-    expiry_in_kolkata = expiry.in_time_zone('Asia/Kolkata')  # Convert expiry time to IST
-    { otp: otp,otp_expiry: expiry_in_kolkata.to_s }
+    self.update(otp: otp, otp_expiry: expiry) # Store in database
+    self.class.store_otp(email, otp, expiry)  # Store in memory for OtpWorker
+    expiry_in_kolkata = expiry.in_time_zone('Asia/Kolkata')
+    { otp: otp, otp_expiry: expiry_in_kolkata.to_s }
   end
   
   
@@ -52,7 +53,7 @@ attr_accessor :otp_expiry
   end
 
   def self.store_otp(email, otp,expiry)
-    otp_store[email] = { otp: otp, expires_at: 2.minutes.from_now }
+    otp_store[email] = { otp: otp, expires_at: expiry }
   end
 
   def self.fetch_otp(email)
@@ -65,36 +66,6 @@ attr_accessor :otp_expiry
 
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
