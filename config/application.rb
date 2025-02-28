@@ -14,8 +14,7 @@ module FundooNotes
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
 
-    Dotenv::Railtie.load if defined?(Dotenv)
-
+    require 'dotenv/rails' if defined?(Dotenv::Railtie)
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
@@ -27,6 +26,8 @@ module FundooNotes
 
     # ✅ Corrected Session Store
     config.session_store :cache_store, key: "_your_app_session", expire_after: 1.day
+    config.time_zone = 'Asia/Kolkata'
+    config.active_record.default_timezone = :local
 
     # Configuration for the application, engines, and railties goes here.
     #
