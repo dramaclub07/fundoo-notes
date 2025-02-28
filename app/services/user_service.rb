@@ -3,6 +3,31 @@ class UserService
   class AuthenticationError < StandardError; end
   class UserNotFoundError < StandardError; end
 
+
+  def self.send_otp(email)
+    user = User.find_by(email: email)
+    return { success: false, errors: "User not found" } unless user
+
+    otp = rand(100000..999999).to_s
+    otp_expiry = 10.minutes.from_now
+    if user.update(otp: otp, otp_expiry: otp_expiry)
+      Rails.logger.info "OTP stored in database: otp=#{otp}, otp_expiry=#{otp_expiry}"
+    else
+      Rails.logger.error "Failed to store OTP: #{user.errors.full_messages.join(', ')}"
+    end
+    send_otp_to_queue(email, otp, otp_expiry)
+    { success: true, message: "OTP has been sent to your email." }
+  end
+
+  def self.verify_otp(email, otp)
+    user = User.find_by(email: email)
+    return { success: false, errors: "User not found" } unless user
+    Rails.logger.info "Verifying OTP: entered='#{otp}', stored='#{user.otp}', expires_at='#{user.otp_expiry}'"
+    return { success: false, errors: "Invalid or expired OTP" } unless user.valid_otp?(otp)
+    { success: true, message: "OTP verified successfully" }
+  end
+
+
   def self.register(params)
     user = User.new(params)
     if user.save
@@ -47,13 +72,14 @@ class UserService
   def self.forgetpassword(params)
     user = User.find_by(email: params[:email])
     return { success: false, errors: "User Not Found" } unless user
-
+      
+    # email = user.email
     otp = user.generate_otp 
     otp_expiry = 10.minutes.from_now # Example expiry time
 
     # Publish the OTP message to RabbitMQ
     send_otp_to_queue(user.email, otp, otp_expiry)
-    Thread.new{OtpWorker.start}         #OTP WORKER START HERE
+    Thread.new{OtpWorker.start}    #OTP WORKER START HERE
     { success: true, message: "OTP is being processed and will be sent shortly." }
   end
 
@@ -72,22 +98,21 @@ class UserService
   end
 
   def self.verify_otp_and_reset_password(email, otp, new_password)
-    user = User.find_by(email: email)
-    return { success: false, errors: "User not found" } unless user
-    return { success: false, errors: "Invalid or expired OTP" } unless user.valid_otp?(otp)
-
-    if user.update(password: new_password)
-      user.clear_otp
-      begin
-        UserMailer.password_reset_successful(user).deliver_now
-      rescue StandardError => e
-        Rails.logger.error("Password reset email failed: #{e.message}")
-      end
-      { success: true, message: "Password reset successfully. A confirmation email has been sent." }
-    else
-      { success: false, errors: user.errors.full_messages.join(", ") }
+  user = User.find_by(email: email)
+  return { success: false, errors: "User not found" } unless user
+  return { success: false, errors: "Invalid or expired OTP" } unless user.valid_otp?(otp)
+  if user.update(password: new_password)
+    user.clear_otp
+    begin
+      UserMailer.password_reset_successful(user).deliver_now
+    rescue StandardError => e
+      Rails.logger.error("Password reset email failed: #{e.message}")
     end
+    { success: true, message: "Password reset successfully. A confirmation email has been sent." }
+  else
+    { success: false, errors: user.errors.full_messages.join(", ") }
   end
+end
 
   def self.login(email, password)
     begin
