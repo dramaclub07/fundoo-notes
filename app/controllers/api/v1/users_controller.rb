@@ -1,13 +1,26 @@
 class Api::V1::UsersController < ApplicationController
-  #skip_before_action :authenticate_user, only: [:register, :login, :forgetpassword, :resetpassword] # Skips authentication for these actions
-  #skip_before_action :verify_authenticity_token, only: [:register, :login, :forgetpassword, :resetpassword]4
   skip_before_action :verify_authenticity_token
+
+  def send_otp
+    result = UserService.send_otp(params[:email])
+    render json: result, status: result[:success] ? :ok : :unprocessable_entity
+  end
+
+  def verify_otp
+    result = UserService.verify_otp(params[:email], params[:otp])
+    if result[:success]
+      user = User.find_by(email: params[:email])
+      render json: { success: true, message: result[:message], user: { id: user.id } }, status: :ok
+    else
+      render json: result, status: result[:success] ? :ok : :unprocessable_entity
+    end
+  end
 
   def register
     Rails.logger.info "Params received: #{params.inspect}"
     result = UserService.register(user_params)
     if result[:success]
-      render json: { message: 'User registered successfully', user: result[:user]}, status: :created
+      render json: { message: 'User registered successfully', user: result[:user] }, status: :created
     else
       render json: { errors: result[:errors] }, status: :unprocessable_entity
     end
@@ -22,19 +35,10 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
-  # def forgetpassword
-  #   result = UserService.forgetpassword(fp_params)
-  #   if result[:success]
-  #     render json: { message: result[:message] }, status: :ok
-  #   else
-  #     render json: { errors: result[:error] }, status: :not_found
-  #   end
-  # end
-
   def forgetpassword
     result = UserService.forgetpassword(fp_params)
     if result[:success]
-      render json: { message: result[:message] }, status: :ok
+      render json: { success: true, message: result[:message] }, status: :ok
     else
       render json: { errors: result[:errors] }, status: :not_found
     end
@@ -42,29 +46,31 @@ class Api::V1::UsersController < ApplicationController
 
   def resetpassword
     user = User.find_by(id: params[:id])
-
-    # Handling if user is not found
     unless user
-      return render json: { errors: "User not found" }, status: :not_found
+      return render json: { success: false, errors: ["User not found"] }, status: :not_found
     end
-
-    Rails.logger.info("Received OTP: #{rp_params[:otp]} for User ID: #{user.id}")
-
-    result = UserService.verify_otp_and_reset_password(user.email, rp_params[:otp], rp_params[:new_password])
-
+    result = UserService.verify_otp_and_reset_password(user.email, params[:otp], params[:new_password])
     if result[:success]
-      render json: { message: "Password updated successfully" }, status: :ok
+      render json: { success: true, message: result[:message] }, status: :ok
     else
-      render json: { errors: result[:errors] }, status: :unprocessable_entity
+      render json: { success: false, errors: result[:errors] }, status: :unprocessable_entity
     end
   end
 
   def profile
-    result = UserService.fetch_profile(current_user)
+    auth_header = request.headers['Authorization']
+    if auth_header && auth_header.start_with?('Bearer ')
+      token = auth_header.split(' ').last
+      decoded_token = JwtService.decode(token)
+      user = User.find_by(id: decoded_token['user_id'])
+      result = UserService.fetch_profile(user)
+    else
+      result = { success: false, errors: ["Unauthorized: No token provided"] }
+    end
     if result[:success]
       render json: { user: result[:user] }, status: :ok
     else
-      render json: { error: result[:error] }, status: :unauthorized
+      render json: { error: result[:errors] }, status: :unauthorized
     end
   end
 
