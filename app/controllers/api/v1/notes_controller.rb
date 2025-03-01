@@ -64,7 +64,7 @@ module Api
       def update
         note_id = params[:id]
         token = request.headers["Authorization"]&.split(" ")&.last
-        result = NotesService.update_note(note_id, token, note_params)
+        result = NotesService.update(note_id, token, note_params)
         if result[:success]
           render json: result[:note], status: :ok
         else

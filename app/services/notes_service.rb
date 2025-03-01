@@ -20,6 +20,24 @@ class NotesService
     end
   end
 
+  def self.update(note_id, token, note_params)
+    decoded_data = JwtService.decode(token)
+    return { success: false, error: "Invalid token data" } unless decoded_data.is_a?(Hash) && decoded_data["user_id"].present?
+
+    user = User.find_by(id: decoded_data["user_id"])
+    return { success: false, error: "User not found" } unless user
+
+    note = Note.find_by(id: note_id, user_id: user.id)
+    return { success: false, error: "Note not found" } unless note
+
+    if note.update(note_params)
+      { success: true, message: "Note updated successfully", note: note }
+    else
+      { success: false, error: note.errors.full_messages.join(", ") }
+    end
+  end
+
+
   def self.update_color(note_id, token, note_params)
     decoded_data = JwtService.decode(token)
     return { success: false, error: "Invalid token data" } unless decoded_data.is_a?(Hash) && decoded_data["user_id"].present?
