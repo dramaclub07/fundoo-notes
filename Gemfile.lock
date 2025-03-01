@@ -274,7 +274,8 @@ GEM
     rbtree (0.4.6)
     rdoc (6.11.0)
       psych (>= 4.0.0)
-    redis (4.8.1)
+    redis (5.4.0)
+      redis-client (>= 0.22.0)
     redis-client (0.23.2)
       connection_pool
     regexp_parser (2.10.0)
@@ -447,7 +448,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rack-cors
   rails (~> 8.0.1)
-  redis (~> 4.3)
+  redis (~> 5.4)
   rspec-rails
   rswag
   rswag-api
