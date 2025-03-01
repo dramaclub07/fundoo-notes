@@ -75,7 +75,7 @@ gem 'bunny'
 gem "dotenv-rails", "~> 3.1"
 
 gem "devise", "~> 4.9"
-gem "redis", "~> 4.3"
+gem "redis", "~> 5.4"
 
 gem "rswag"
 gem "rswag-api"
